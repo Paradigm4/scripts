@@ -18,21 +18,21 @@ Examples follow:
 
 * Back up all data to one directory named 'backupdir' on the SciDB coordinator instance
 using the SciDB 'opaque' storage format:
-```
-  scidb_backup save-opaque backupdir
-```
+	```
+	  scidb_backup save-opaque backupdir
+	```
 * ...and the reload the data...
-```
-  scidb_backup restore-opaque backupdir
-```
+	```
+	  scidb_backup restore-opaque backupdir
+	```
 * Back up all data to one directory named 'backupdir' on the SciDB coordinator instance
 using binary storage formats based on array attributes (also showing reload):
-```
-  scidb_backup save-binary backupdir
-  scidb_backup restore-binary backupdir
-```
+	```
+	  scidb_backup save-binary backupdir
+	  scidb_backup restore-binary backupdir
+	```
 * Back up and restore all data in parallel to one subdirectory per SciDB instance, located inside each instance data directory, using the SciDB 'opaque' storage format:
-```
-  scidb_backup save-opaque backupdir 1
-  scidb_backup restore-opaque backupdir 1
-```
+	```
+	  scidb_backup save-opaque backupdir 1
+	  scidb_backup restore-opaque backupdir 1
+	```
