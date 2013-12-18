@@ -3,8 +3,16 @@ scripts
 
 ## Miscellaneous SciDB scripts and utilities
 
-### scidb_backup.sh
+### scidb_backup.sh <command> <directory> [1]
 
+```<command>``` is one of ````save-opaque```, ```restore-opaque```, ```save-binary```, ```restore-binary```.
+
+```<directory>``` is the name of a directory to save data to, see the discussion below.
+
+The optional numeric flag at the end signifies use parallel save/load if it's set to 1. Otherwise
+save and load all the data to one directory on the SciDB coordinator instance.
+
+#### Details
 This is a basic script that backs up SciDB databases to files and reloads them.
 The script helps automate some of the details by saving all arrays listed in
 the database along with a manifest of the saved arrays and their schema.
