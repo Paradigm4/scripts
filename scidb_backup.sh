@@ -65,7 +65,7 @@ create_dirs ()
     instance=$(echo $line | sed -e "s/,.*//" | tr -d "'")
     ipath="$(echo $line | sed -e "s/.*,//" | tr -d "'")/$1"
     echo "ssh $instance \"mkdir -p ${ipath}\""
-    ssh $instance "mkdir -p ${ipath}" &
+    ssh $instance "mkdir -p ${ipath}; sleep 1" &
   done
   wait
 }
@@ -100,9 +100,12 @@ if test "${1}" == "save-binary"; then
   while read x;
   do
     name=$(echo "${x}" | cut -d , -f 1 | sed -e "s/'//g")
-    a=$(echo "${x}" | sed -e "s/.*<//" | sed -e "s/>.*//")
+# Flatten the array as a 1-d array. Warning, we assume that the array does
+# not have a dimension nor an attribute named "__row."
+    unschema=$(iquery -ocsv -aq "show('unpack(${name},__row)','afl')" | sed 1d)
+    a=$(echo "${unschema}" | sed -e "s/.*<//" | sed -e "s/>.*//")
     fmt="($(echo "${a}" | sed -e "s/:/\n/g" | sed -e "s/,/\n/g" | sed -n 'g;n;p' | sed -e "s/DEFAULT.*//" | tr "\n" "," | sed -e "s/,$//"))"
-    query="save(${name}, '${path}${name}', ${NODES}, '${fmt}')"
+    query="save(unpack(${name},__row), '${path}${name}', ${NODES}, '${fmt}')"
     echo "Archiving array ${name}"
     iquery -naq "${query}"
   done < ${mpath}.manifest
@@ -118,10 +121,13 @@ if test "${1}" == "restore-binary"; then
   while read x;
   do
     name=$(echo "${x}" | cut -d , -f 1 | sed -e "s/'//g")
+# The final array schema:
     s=$(echo ${x} | sed -e "s/.*</</" | sed -e "s/'.*//g")
-    a=$(echo "${x}" | sed -e "s/.*<//" | sed -e "s/>.*//")
+# The unpack array schema:
+    u=$(iquery -ocsv -aq "show('unpack(input(${s},\'/dev/null\'),__row)','afl')" | sed 1d | sed -e "s/.*</</" | tr -d "'")
+    a=$(echo "${u}" | sed -e "s/.*<//" | sed -e "s/>.*//")
     fmt="($(echo "${a}" | sed -e "s/:/\n/g" | sed -e "s/,/\n/g" | sed -n 'g;n;p' | sed -e "s/DEFAULT.*//" | tr "\n" "," | sed -e "s/,$//"))"
-    query="store(input(${s},'${path}${name}',${NODES},'${fmt}'),${name})"
+    query="store(redimension(input(${u},'${path}${name}',${NODES},'${fmt}'),${s}),${name})"
     echo "Restoring array ${name}"
     iquery -naq "${query}"
   done < ${mpath}.manifest
