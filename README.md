@@ -3,7 +3,13 @@ scripts
 
 ## Miscellaneous SciDB scripts and utilities
 
-### scidb_backup.sh &lt;command&gt; &lt;directory&gt; [1]
+### scidb_backup.sh
+
+#### Synopsis
+
+```
+scidb_backup.sh <command> <directory> [1]
+```
 
 ```<command>``` is one of ````save-opaque```, ```restore-opaque```, ```save-binary```, ```restore-binary```.
 
