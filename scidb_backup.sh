@@ -61,12 +61,11 @@ fi
 
 create_dirs ()
 {
-  iquery -ocsv -aq "list('instances')" | sed 1d | while read line;
-  do
+  iquery -ocsv -aq "list('instances')" | sed 1d | while read line; do
     instance=$(echo $line | sed -e "s/,.*//" | tr -d "'")
     ipath="$(echo $line | sed -e "s/.*,//" | tr -d "'")/$1"
     echo "ssh $instance \"mkdir -p ${ipath}\""
-    ssh $instance "mkdir -p ${ipath} && touch ${ipath}/.ok" &
+    ssh $instance "mkdir -p ${ipath}" &
   done
   wait
 }
