@@ -17,24 +17,24 @@ Restore SciDB data with:
   -or-
 ./scidb_backup.sh restore-binary <directory containing saved data> [parallel]
 
-Remove backup data and directories (warning!)
-./scidb_backup.sh remove_backup_dirs <directory>
+Run this script from the SciDB coordinator node.
 
-If the backup directory does not already exist, then it will be created.
+Specify the optional parallel flag to indicate parallel save/load. When
+parallel save or load is specified, the directory path name serves as a base
+name for a set of numbered data directories, one for each SciDB instance. Data
+will be saved in parallel by each instance into its directory. If the numbered
+data directories don't exist, they will be created on each node. This option
+requires ssh to set up the directories on each node.
 
-Set the optional parallel flag to 1 to indicate parallel save/load. Then the
-data directory is assumed to be a subdirectory of each of the SciDB instance
-data directories. Note that parallel save requires ssh access to each SciDB
-node to set up the directories.
-
-If the parallel flag is not specified or not set to 1, then the backup data
-are saved to the specified directory path on the coordinator instance.
+If the parallel flag is not specified, then the backup data are saved to the
+specified directory path only on the coordinator instance.  If the backup
+directory does not already exist, then it will be created.
 
 The script assumes that SciDB is running on its default port.
 
-The opaque methods are faster and more general, but sometimes the opaque
-save format does not work between SciDB versions. In such cases, use the
-binary methods.
+The opaque methods are faster and more general, but sometimes the opaque save
+format does not work between SciDB versions. In such cases, use the binary
+methods.
 eof
 
 NODES="0"
@@ -42,11 +42,15 @@ NODES="0"
 [ $# -lt 2 ] && echo "${usage}" && exit 1
 
 if test $# -gt 2; then
+  echo "Parallel save/load"
 # Parallel save/load
   NODES="-1"
   path="${2}/"
+  apath="$(readlink -f ${2})"
+  rpath="$(basename ${apath})"
 # In this case, the manifest is only stored on the coordinator.
-  mpath="$(iquery -ocsv -aq "list('instances')" | sed -n 2p | sed -e "s/.*,//" | tr -d "'")/"
+  mpath="${apath}.1/"
+  mkdir -p "${mpath}"
 else
   path="$(readlink -f ${2})/"
   if test ! -d "${path}"; then
@@ -59,33 +63,27 @@ else
   mpath="${path}"
 fi
 
+# Create directories for parallel save/load.
 create_dirs ()
 {
+  j=1
+  abspath="$(readlink -f ${1})"
+  relpath="$(basename ${abspath})"
   iquery -ocsv -aq "list('instances')" | sed 1d | while read line; do
     instance=$(echo $line | sed -e "s/,.*//" | tr -d "'")
-    ipath="$(echo $line | sed -e "s/.*,//" | tr -d "'")/$1"
-    echo "ssh $instance \"mkdir -p ${ipath}\""
-    ssh $instance "mkdir -p ${ipath}; sleep 1" &
+    ipath="$(echo $line | sed -e "s/.*,//" | tr -d "'")/${relpath}"
+    echo "ssh $instance \"mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}\""
+    ssh $instance "mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}" &
+    j=$(($j + 1))
   done
   wait
 }
 
-if test "${1}" == "delete_backup_dirs"; then
-  iquery -ocsv -aq "list('instances')" | sed 1d | while read line;
-  do
-    instance=$(echo $line | sed -e "s/,.*//" | tr -d "'")
-    ipath="$(echo $line | sed -e "s/.*,//" | tr -d "'")/$1"
-    echo "ssh $instance \"rm -rf ${ipath}\""
-    ssh $instance "rm -rf ${ipath}" &
-  done
-  wait
-  exit 0
-fi
 
 # Backup array data
 if test "${1}" == "save-opaque"; then
   [ "${NODES}" == "-1" ] && create_dirs ${path}
-  iquery -ocsv -aq "list('arrays')" | sed 1d > ${mpath}.manifest
+  iquery -ocsv -aq "list('arrays')" | sed 1d > "${mpath}.manifest"
   a=$(cat ${mpath}.manifest | cut -d , -f 1 | sed -e "s/'//g")
   for x in ${a};do
     echo "Archiving array ${x}"
@@ -96,7 +94,8 @@ fi
 
 if test "${1}" == "save-binary"; then
   [ "${NODES}" == "-1" ] && create_dirs ${path}
-  iquery -ocsv -aq "list('arrays')" | sed 1d > ${mpath}.manifest
+  relpath="$(basename ${path})/"
+  iquery -ocsv -aq "list('arrays')" | sed 1d > "${mpath}.manifest"
   while read x;
   do
     name=$(echo "${x}" | cut -d , -f 1 | sed -e "s/'//g")
@@ -105,10 +104,10 @@ if test "${1}" == "save-binary"; then
     unschema=$(iquery -ocsv -aq "show('unpack(${name},__row)','afl')" | sed 1d)
     a=$(echo "${unschema}" | sed -e "s/.*<//" | sed -e "s/>.*//")
     fmt="($(echo "${a}" | sed -e "s/:/\n/g" | sed -e "s/,/\n/g" | sed -n 'g;n;p' | sed -e "s/DEFAULT.*//" | tr "\n" "," | sed -e "s/,$//"))"
-    query="save(unpack(${name},__row), '${path}${name}', ${NODES}, '${fmt}')"
+    query="save(unpack(${name},__row), '${relpath}${name}', ${NODES}, '${fmt}')"
     echo "Archiving array ${name}"
     iquery -naq "${query}"
-  done < ${mpath}.manifest
+  done < "${mpath}.manifest"
   exit 0
 fi
 
@@ -118,6 +117,7 @@ if test ! -f "${mpath}.manifest"; then
 fi
 
 if test "${1}" == "restore-binary"; then
+  relpath="$(basename ${path})/"
   while read x;
   do
     name=$(echo "${x}" | cut -d , -f 1 | sed -e "s/'//g")
@@ -127,7 +127,7 @@ if test "${1}" == "restore-binary"; then
     u=$(iquery -ocsv -aq "show('unpack(input(${s},\'/dev/null\'),__row)','afl')" | sed 1d | sed -e "s/.*</</" | tr -d "'")
     a=$(echo "${u}" | sed -e "s/.*<//" | sed -e "s/>.*//")
     fmt="($(echo "${a}" | sed -e "s/:/\n/g" | sed -e "s/,/\n/g" | sed -n 'g;n;p' | sed -e "s/DEFAULT.*//" | tr "\n" "," | sed -e "s/,$//"))"
-    query="store(redimension(input(${u},'${path}${name}',${NODES},'${fmt}'),${s}),${name})"
+    query="store(redimension(input(${u},'${relpath}${name}',${NODES},'${fmt}'),${s}),${name})"
     echo "Restoring array ${name}"
     iquery -naq "${query}"
   done < ${mpath}.manifest
@@ -135,7 +135,7 @@ if test "${1}" == "restore-binary"; then
 fi
 
 if test "${1}" != "restore-opaque"; then
-  echo ${usage}
+  echo "${usage}"
   exit 3
 fi
 

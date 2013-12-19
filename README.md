@@ -8,15 +8,15 @@ scripts
 #### Synopsis
 
 ```
-scidb_backup.sh <command> <directory> [1]
+scidb_backup.sh <command> <directory> [parallel]
 ```
 
 ```<command>``` is one of ````save-opaque```, ```restore-opaque```, ```save-binary```, ```restore-binary```.
 
 ```<directory>``` is the name of a directory to save data to, see the discussion below.
 
-The optional numeric flag at the end signifies use parallel save/load if it's set to 1. Otherwise
-save and load all the data to one directory on the SciDB coordinator instance.
+The optional parallel flag enables parallel save/load. Otherwise save and load
+all the data to one directory on the SciDB coordinator instance.
 
 #### Details
 This is a basic script that backs up SciDB databases to files and reloads them.
@@ -30,7 +30,7 @@ binary storage format only saves the current version of the listed arrays.
 
 Examples follow:
 
-* Back up all data to one directory named 'backupdir' on the SciDB coordinator instance
+* Back up all data into one directory named 'backupdir' on the SciDB coordinator instance
 using the SciDB 'opaque' storage format:
 
     ```
@@ -43,7 +43,7 @@ using the SciDB 'opaque' storage format:
     scidb_backup restore-opaque backupdir
     ```
 
-* Back up all data to one directory named 'backupdir' on the SciDB coordinator instance
+* Back up all data into one directory named 'backupdir' on the SciDB coordinator instance
 using binary storage formats based on array attributes (also showing reload):
 
     ```
@@ -51,9 +51,9 @@ using binary storage formats based on array attributes (also showing reload):
     scidb_backup restore-binary backupdir
     ```
 
-* Back up and restore all data in parallel to one subdirectory per SciDB instance, located inside each instance data directory, using the SciDB 'opaque' storage format:
+* Back up and restore all data in parallel in one subdirectory per SciDB instance. The subdirectories will be located in this example in /tmp/backup.**j**, where **j** is a number corresponding to each SciDB instance. The directories will be created by ssh commands issued to each SciDB instance node. This example uses the `opaque` format:
 
     ```
-    scidb_backup save-opaque backupdir 1
-    scidb_backup restore-opaque backupdir 1
+    scidb_backup save-opaque /tmp/backup 1
+    scidb_backup restore-opaque /tmp/backup 1
     ```
