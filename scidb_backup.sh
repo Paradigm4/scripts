@@ -54,8 +54,7 @@ if test $# -gt 2; then
   echo "Parallel save/load"
 # Parallel save/load
   NODES="-1"
-  path="${2}/"
-  apath="$(readlink -f ${2})"
+  apath="$(readlink -f ${2})/"
   path="$(basename ${apath})/"
 # In this case, the manifest is only stored on the coordinator.
   mpath="${apath}.1/"
@@ -91,7 +90,7 @@ create_dirs ()
 
 # Backup array data
 if test "${1}" == "save-opaque"; then
-  [ "${NODES}" == "-1" ] && create_dirs ${path}
+  [ "${NODES}" == "-1" ] && create_dirs ${apath}
   iquery -ocsv -aq "list('arrays')" | sed 1d > "${mpath}.manifest"
   a=$(cat ${mpath}.manifest | cut -d , -f 1 | sed -e "s/'//g")
   for x in ${a};do
@@ -102,7 +101,7 @@ if test "${1}" == "save-opaque"; then
 fi
 
 if test "${1}" == "save-binary"; then
-  [ "${NODES}" == "-1" ] && create_dirs ${path}
+  [ "${NODES}" == "-1" ] && create_dirs ${apath}
   iquery -ocsv -aq "list('arrays')" | sed 1d > "${mpath}.manifest"
   while read x;
   do
