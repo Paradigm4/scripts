@@ -56,8 +56,8 @@ using binary storage formats based on array attributes (also showing reload):
 * Back up and restore all data in parallel in one subdirectory per SciDB instance. The subdirectories will be located in this example in /tmp/backup.**j**, where **j** is a number corresponding to each SciDB instance. The directories will be created by ssh commands issued to each SciDB instance node. This example uses the `opaque` format:
 
     ```
-    scidb_backup save-opaque /tmp/backup 1
-    scidb_backup restore-opaque /tmp/backup 1
+    scidb_backup save-opaque /tmp/backup parallel
+    scidb_backup restore-opaque /tmp/backup parallel
     ```
 
 #### Limitations
