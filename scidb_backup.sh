@@ -56,7 +56,7 @@ if test $# -gt 2; then
   NODES="-1"
   path="${2}/"
   apath="$(readlink -f ${2})"
-  rpath="$(basename ${apath})"
+  path="$(basename ${apath})/"
 # In this case, the manifest is only stored on the coordinator.
   mpath="${apath}.1/"
   mkdir -p "${mpath}"
@@ -82,7 +82,7 @@ create_dirs ()
     instance=$(echo $line | sed -e "s/,.*//" | tr -d "'")
     ipath="$(echo $line | sed -e "s/.*,//" | tr -d "'")/${relpath}"
     echo "ssh $instance \"mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}\""
-    ssh $instance "mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}" &
+    ssh $instance "mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}" >/dev/null 2>&1 </dev/null
     j=$(($j + 1))
   done
   wait
@@ -103,7 +103,6 @@ fi
 
 if test "${1}" == "save-binary"; then
   [ "${NODES}" == "-1" ] && create_dirs ${path}
-  relpath="$(basename ${path})/"
   iquery -ocsv -aq "list('arrays')" | sed 1d > "${mpath}.manifest"
   while read x;
   do
@@ -113,7 +112,7 @@ if test "${1}" == "save-binary"; then
     unschema=$(iquery -ocsv -aq "show('unpack(${name},__row)','afl')" | sed 1d)
     a=$(echo "${unschema}" | sed -e "s/.*<//" | sed -e "s/>.*//")
     fmt="($(echo "${a}" | sed -e "s/:/\n/g" | sed -e "s/,/\n/g" | sed -n 'g;n;p' | sed -e "s/DEFAULT.*//" | tr "\n" "," | sed -e "s/,$//"))"
-    query="save(unpack(${name},__row), '${relpath}${name}', ${NODES}, '${fmt}')"
+    query="save(unpack(${name},__row), '${path}${name}', ${NODES}, '${fmt}')"
     echo "Archiving array ${name}"
     iquery -naq "${query}"
   done < "${mpath}.manifest"
@@ -126,7 +125,6 @@ if test ! -f "${mpath}.manifest"; then
 fi
 
 if test "${1}" == "restore-binary"; then
-  relpath="$(basename ${path})/"
   while read x;
   do
     name=$(echo "${x}" | cut -d , -f 1 | sed -e "s/'//g")
@@ -136,7 +134,7 @@ if test "${1}" == "restore-binary"; then
     u=$(iquery -ocsv -aq "show('unpack(input(${s},\'/dev/null\'),__row)','afl')" | sed 1d | sed -e "s/.*</</" | tr -d "'")
     a=$(echo "${u}" | sed -e "s/.*<//" | sed -e "s/>.*//")
     fmt="($(echo "${a}" | sed -e "s/:/\n/g" | sed -e "s/,/\n/g" | sed -n 'g;n;p' | sed -e "s/DEFAULT.*//" | tr "\n" "," | sed -e "s/,$//"))"
-    query="store(redimension(input(${u},'${relpath}${name}',${NODES},'${fmt}'),${s}),${name})"
+    query="store(redimension(input(${u},'${path}${name}',${NODES},'${fmt}'),${s}),${name})"
     echo "Restoring array ${name}"
     iquery -naq "${query}"
   done < ${mpath}.manifest
