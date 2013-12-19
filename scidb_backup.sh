@@ -74,16 +74,26 @@ fi
 # Create directories for parallel save/load.
 create_dirs ()
 {
-  j=1
   abspath="$(readlink -f ${1})"
   relpath="$(basename ${abspath})"
-  iquery -ocsv -aq "list('instances')" | sed 1d | while read line; do
-    instance=$(echo $line | sed -e "s/,.*//" | tr -d "'")
+  declare -A nodes
+# We manually loop here instead of using read because read uses a subprocess
+# and we want access to the 'nodes' array.
+  x=$(iquery -ocsv -aq "list('instances')" | sed 1d)
+  N=$(echo "${x}" | wc -l)
+  j=1
+  while test ${j} -le ${N};do
+    line=$(echo "${x}" | sed -n ${j}p)
+    instance="$(echo ${line} | sed -e "s/,.*//" | tr -d "'")"
     ipath="$(echo $line | sed -e "s/.*,//" | tr -d "'")/${relpath}"
-    echo "ssh $instance \"mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}\""
-# XXX This is dumb. fix it to ssh just once to each node.
-    ssh $instance "mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}" </dev/null 
+    nodes[${instance}]="${nodes[${instance}]};mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}"
     j=$(($j + 1))
+  done
+# Run one command per node to create all the directories on that node
+  for node in "${!nodes[@]}"; do
+    cmd=$(echo ${nodes[${node}]} | sed -e "s/^;//g")
+    ssh ${node} "${cmd}" &
+    echo ssh ${node} "${cmd}"
   done
   wait
 }
