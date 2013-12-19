@@ -5,6 +5,8 @@ scripts
 
 ### scidb_backup.sh
 
+Easily back up or restore all arrays in a SciDB database.
+
 #### Synopsis
 
 ```
@@ -57,3 +59,7 @@ using binary storage formats based on array attributes (also showing reload):
     scidb_backup save-opaque /tmp/backup 1
     scidb_backup restore-opaque /tmp/backup 1
     ```
+
+#### Limitations
+
+This script only backs up current versions of each listed array. It does **not** save and restore array versions (yet).

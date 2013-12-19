@@ -3,6 +3,15 @@
 # A basic script that backs up SciDB databases to files and reloads them.
 # Run this script from the coordinator instance. The script uses iquery
 # and assumes it is available in the PATH.
+#
+# TODO: Back up and restore array versions. One idea might be this:
+# For each array:
+#   store the first version
+#   for each version > 1:
+#     save the array to a pipe and diff the pipe against the fist
+#     version, saving that to a file.
+# And then reverse this process for restore. Anyway, somebody needs to
+# write this!
 
 unalias iquery >/dev/null 2>&1
 read -d '' usage << "eof"
