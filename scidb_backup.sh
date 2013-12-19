@@ -81,7 +81,8 @@ create_dirs ()
     instance=$(echo $line | sed -e "s/,.*//" | tr -d "'")
     ipath="$(echo $line | sed -e "s/.*,//" | tr -d "'")/${relpath}"
     echo "ssh $instance \"mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}\""
-    ssh $instance "mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}" >/dev/null 2>&1 </dev/null
+# XXX This is dumb. fix it to ssh just once to each node.
+    ssh $instance "mkdir -p ${abspath}.${j}; ln -sf ${abspath}.${j} ${ipath}" </dev/null 
     j=$(($j + 1))
   done
   wait
