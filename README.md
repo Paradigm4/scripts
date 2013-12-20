@@ -62,4 +62,5 @@ using binary storage formats based on array attributes (also showing reload):
 
 #### Limitations
 
-This script only backs up current versions of each listed array. It does **not** save and restore array versions (yet).
+- This script only backs up current versions of each listed array. It does **not** save and restore array versions (yet).
+- Parallel restore must run on a SciDB cluster of the same size that parallel save ran on.
