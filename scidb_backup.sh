@@ -135,6 +135,7 @@ if test ! -f "${mpath}.manifest"; then
 fi
 
 if test "${1}" == "restore-binary"; then
+  [ "${NODES}" == "-1" ] && create_dirs ${apath}
   while read x;
   do
     name=$(echo "${x}" | cut -d , -f 1 | sed -e "s/'//g")
