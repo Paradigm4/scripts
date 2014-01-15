@@ -13,7 +13,7 @@ Easily back up or restore all arrays in a SciDB database.
 scidb_backup.sh <command> <directory> [parallel]
 ```
 
-```<command>``` is one of ````save-opaque```, ```restore-opaque```, ```save-binary```, ```restore-binary```.
+```<command>``` is one of ```save-opaque```, ```restore-opaque```, ```save-binary```, ```restore-binary```.
 
 ```<directory>``` is the name of a directory to save data to, see the discussion below.
 
@@ -27,10 +27,18 @@ the database along with a manifest of the saved arrays and their schema.
 
 It can save arrays in SciDB's 'opaque' storage format, or in binary format
 based on the array attribute types as a fallback if the opaque storage format
-won't work (for example across incompatible SciDB versions). Beware that the
-binary storage format only saves the current version of the listed arrays.
+won't work (for example across incompatible SciDB versions).
 
-Examples follow:
+### Caution
+
+* Beware that both formats only saves the last version of the listed arrays.
+* Opaque format should almost never be used to back up data between SciDB
+  database versions. Use binary format instead. (Use opaque format to
+  quickly back up and restore data within a single SciDB version, for example
+  to help with node recovery.)
+* Parallel restore must run on a SciDB cluster of the same size that parallel save ran on.
+
+### Examples
 
 * Back up all data into one directory named 'backupdir' on the SciDB coordinator instance
 using the SciDB 'opaque' storage format:
@@ -53,14 +61,9 @@ using binary storage formats based on array attributes (also showing reload):
     scidb_backup restore-binary backupdir
     ```
 
-* Back up and restore all data in parallel in one subdirectory per SciDB instance. The subdirectories will be located in this example in /tmp/backup.**j**, where **j** is a number corresponding to each SciDB instance. The directories will be created by ssh commands issued to each SciDB instance node. This example uses the `opaque` format:
+* Back up and restore all data in parallel in one subdirectory per SciDB instance. The subdirectories will be located in this example in /tmp/backup.**j** created across the nodes, where **j** is a number corresponding to each SciDB instance. The directories will be created by ssh commands issued to each SciDB instance node. This example uses the `binary` format:
 
     ```
-    scidb_backup save-opaque /tmp/backup parallel
-    scidb_backup restore-opaque /tmp/backup parallel
+    scidb_backup save-binary /tmp/backup parallel
+    scidb_backup restore-binary /tmp/backup parallel
     ```
-
-#### Limitations
-
-- This script only backs up current versions of each listed array. It does **not** save and restore array versions (yet).
-- Parallel restore must run on a SciDB cluster of the same size that parallel save ran on.
