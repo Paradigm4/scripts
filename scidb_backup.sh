@@ -54,16 +54,13 @@ if test $# -gt 2; then
   echo "Parallel save/load"
 # Parallel save/load
   NODES="-1"
-  apath="$(readlink -f ${2})/"
+  apath="$(mkdir -p ${2} && readlink -f ${2})/"
   path="$(basename ${apath})/"
 # In this case, the manifest is only stored on the coordinator.
   mpath="${apath}.1/"
   mkdir -p "${mpath}"
 else
-  path="$(readlink -f ${2})/"
-  if test ! -d "${path}"; then
-    mkdir -p "${path}"
-  fi
+  path="$(mkdir -p ${2} && readlink -f ${2})/"
   if test ! -d "${path}"; then
     echo "${usage}"
     exit 2
