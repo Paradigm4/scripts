@@ -5,7 +5,7 @@ scripts
 
 ### scidb_backup.sh
 
-Easily back up or restore all arrays in a SciDB database.
+Easily back up or restore arrays in a SciDB database.
 
 #### Synopsis
 
@@ -42,7 +42,6 @@ won't work (for example across incompatible SciDB versions).
 
 ### Caution
 
-* Beware that both formats only save the last version of the listed arrays.
 * Opaque format should almost never be used to back up data between SciDB
   database versions. Use binary format instead. (Use opaque format to
   quickly back up and restore data within a single SciDB version, for example
