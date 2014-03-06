@@ -1,7 +1,7 @@
 scripts
 =======
 
-## Miscellaneous SciDB scripts and utilities
+## NOTE: The scidb_backup script has been promoted to official status and is included with SciDB as of version 14.3. We'll keep this software archive but it's no longer actively maintained.
 
 ### scidb_backup.sh
 
