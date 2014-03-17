@@ -27,12 +27,77 @@ stage/build/doc/api
 ```
 and run:
 ```
-doxygen Doxygen
+doxygen Doxyfile
 ```
 This directory contains the manpage formatted Doxygen.
 Make sure SciDB is running and navigate to that directory and run the man2scidb script.
 
-Voila! You now have an array named 'help' that has all our operator Doxygen documentation in it.
+Voila! You now have an array named 'help' that has all our operator Doxygen documentation in it. You can directly filter this file for specific operators, or
+feel free to use index_lookup and redimension to dimension along operator name.
+
+### Example
+```
+iquery -aq "filter(help, name='rehsape')"
+{i} name,help
+{57} 'reshape','
+scidb::LogicalReshape(3)			      scidb::LogicalReshape(3)
+
+
+
+NAME
+       scidb::LogicalReshape -
+
+       The operator: reshape().
+
+
+SYNOPSIS
+       Inherits scidb::LogicalOperator.
+
+   Public Member Functions
+       LogicalReshape (const string &logicalName, const std::string &alias)
+       ArrayDesc inferSchema (std::vector< ArrayDesc > schemas,
+	   boost::shared_ptr< Query > query)
+
+Detailed Description
+       The operator: reshape().
+       Synopsis:.RS 4 reshape( srcArray, schema )
+
+Summary:.RS 4 Produces a result array containing the same cells as, but a
+different shape from, the source array.
+
+Input:.RS 4
+
+
+· srcArray: the source array with srcAttrs and srcDims.
+
+· schema: the desired schema, with the same attributes as srcAttrs, but with
+  different size and/or number of dimensions. The restriction is that the
+  product of the dimension sizes is equal to the number of cells in srcArray.
+
+
+Output array:.RS 4 <
+ srcAttrs
+ >
+ [
+ dimensions from the provided schema
+ ]
+
+Examples:.RS 4 n/a
+
+Errors:.RS 4 n/a
+
+Notes:.RS 4 n/a
+
+
+
+
+Author
+       Generated automatically by Doxygen for SciDB from the source code.
+
+
+
+SciDB				  17 Mar 2014	      scidb::LogicalReshape(3)
+```
 
 
 ## scidb_backup.sh
