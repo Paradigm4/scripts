@@ -1,6 +1,40 @@
 scripts
 =======
 
+## man2scidb
+
+Use the man2scidb script  to build a SciDB array that contains the
+SciDB source code Doxygen help for SciDB operators. This script requires
+that you have the SciDB source code, available from http://scidb.org.
+
+1. Edit doc/api/Doxyfile.in in your SciDB source trunk directory.  Change the following line from:
+```
+GENERATE_MAN           = NO
+```
+to:
+```
+GENERATE_MAN           = YES
+```
+Then build SciDB normally, for example using run.py.
+
+2.  In the staging directory where SciDB was built you will have a directory like:
+```
+stage/build/doc/api/man/man3/
+```
+If you don't have this directory, navigate to:
+```
+stage/build/doc/api
+```
+and run:
+```
+doxygen Doxygen
+```
+This directory contains the manpage formatted Doxygen.
+Make sure SciDB is running and navigate to that directory and run the man2scidb script.
+
+Voila! You now have an array named 'help' that has all our operator Doxygen documentation in it.
+
+
 ## NOTE: The scidb_backup script has been promoted to official status and is included with SciDB as of version 14.3. We'll keep this software archive but it's no longer actively maintained.
 
 ### scidb_backup.sh

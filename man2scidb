@@ -1,0 +1,28 @@
+#!/bin/bash
+# This script stores the help created by Doxygen into a SciDB array.
+
+TMP=$(mktemp)
+ARRAY_NAME="help"
+
+j="true"
+echo "{0}[" > ${TMP}
+for x in $(ls scidb_Logical*); do
+  NAME=$(grep "The operator" $x | head -n 1| sed -e "s/.*: //" | sed -e "s/(.*//")
+  if test -n "${NAME}"; then
+    echo "Adding ${NAME}"
+    if test -z "${j}"; then
+      echo "," >> ${TMP}
+    else
+      j=
+    fi
+    echo "(\"${NAME}\",\"" >> ${TMP}
+    nroff -man $x | col -b >> ${TMP}
+    echo "\")" >> ${TMP}
+  fi
+done
+echo "]" >> ${TMP}
+
+iquery -naq "remove(${ARRAY_NAME})" 2>/dev/null
+echo "Creating help array named ${ARRAY_NAME}"
+iquery -naq "store(input(<name:string,help:string>[i=0:*,100000,0],'$TMP'),${ARRAY_NAME})"
+rm -f ${TMP}
