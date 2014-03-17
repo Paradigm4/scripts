@@ -7,7 +7,9 @@ Use the man2scidb script  to build a SciDB array that contains the
 SciDB source code Doxygen help for SciDB operators. This script requires
 that you have the SciDB source code, available from http://scidb.org.
 
-1. Edit doc/api/Doxyfile.in in your SciDB source trunk directory.  Change the following line from:
+### Step 1
+
+Edit doc/api/Doxyfile.in in your SciDB source trunk directory.  Change the following line from:
 ```
 GENERATE_MAN           = NO
 ```
@@ -15,12 +17,15 @@ to:
 ```
 GENERATE_MAN           = YES
 ```
-Then build SciDB normally, for example using run.py.
-2.  In the staging directory where SciDB was built you will have a directory like:
+Then build SciDB normally, for example using the run.py script.
+
+### Step 2
+
+In the staging directory where SciDB was built you will have a directory like:
 ```
 stage/build/doc/api/man/man3/
 ```
-If you don't have this directory, navigate to:
+If you **don't** have this directory, navigate to:
 ```
 stage/build/doc/api
 ```
@@ -28,7 +33,10 @@ and run:
 ```
 doxygen Doxyfile
 ```
-3. Make sure SciDB is running and navigate to the stage/build/doc/api/man/man3 directory and run the man2scidb script.
+
+### Step 3
+
+Make sure SciDB is running and navigate to the stage/build/doc/api/man/man3 directory and run the man2scidb script.
 
 Voila! You now have an array named 'help' that has all our operator Doxygen documentation in it. You can directly filter this file for specific operators, or
 feel free to use index_lookup and redimension to dimension along operator name.
