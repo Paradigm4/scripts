@@ -35,9 +35,9 @@ Make sure SciDB is running and navigate to that directory and run the man2scidb 
 Voila! You now have an array named 'help' that has all our operator Doxygen documentation in it.
 
 
-## NOTE: The scidb_backup script has been promoted to official status and is included with SciDB as of version 14.3. We'll keep this software archive but it's no longer actively maintained.
+## scidb_backup.sh
+### NOTE: The scidb_backup script has been promoted to official status and is included with SciDB as of version 14.3. We'll keep this software archive but it's no longer actively maintained.
 
-### scidb_backup.sh
 
 Easily back up or restore arrays in a SciDB database.
 
