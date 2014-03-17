@@ -16,7 +16,6 @@ to:
 GENERATE_MAN           = YES
 ```
 Then build SciDB normally, for example using run.py.
-
 2.  In the staging directory where SciDB was built you will have a directory like:
 ```
 stage/build/doc/api/man/man3/
@@ -29,8 +28,7 @@ and run:
 ```
 doxygen Doxyfile
 ```
-This directory contains the manpage formatted Doxygen.
-Make sure SciDB is running and navigate to that directory and run the man2scidb script.
+3. Make sure SciDB is running and navigate to the stage/build/doc/api/man/man3 directory and run the man2scidb script.
 
 Voila! You now have an array named 'help' that has all our operator Doxygen documentation in it. You can directly filter this file for specific operators, or
 feel free to use index_lookup and redimension to dimension along operator name.
