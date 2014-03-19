@@ -475,7 +475,7 @@ checkRestoreOptions()
 if [ ${ARG_ACTION} == "save-opaque" ] || [ ${ARG_ACTION} == "save-text" ] ; then
   [ "${NODES}" == "-1" ] && create_dirs ${apath}
   # Save array names in the manifest file.
-  iquery -ocsv ${QUERY_TYPE}  "${LIST_QUERY}" | sed 1d | sed "/'${ARG_PATTERN}'/!d" | sed ${VERSION_NAME_FILTER} > "${mpath}.manifest"
+  iquery -ocsv ${QUERY_TYPE}  "${LIST_QUERY}" | sed 1d | sed -n "/${ARG_PATTERN}/p" | sed ${VERSION_NAME_FILTER} > "${mpath}.manifest"
   # Save the options in the .save_opts
   echo ${ORIG_ARGS} > "${mpath}.save_opts"
   a=$(cat ${mpath}.manifest | cut -d , -f 1 | sed -e "s/'//g")
@@ -496,7 +496,7 @@ if test "${ARG_ACTION}" == "save-binary";
 then
   [ "${NODES}" == "-1" ] && create_dirs ${apath}
   # Save array names in the manifest file.
-  iquery -ocsv ${QUERY_TYPE}  "${LIST_QUERY}" | sed 1d | sed "/'${ARG_PATTERN}'/!d" | sed ${VERSION_NAME_FILTER} > "${mpath}.manifest"
+  iquery -ocsv ${QUERY_TYPE}  "${LIST_QUERY}" | sed 1d | sed -n "/${ARG_PATTERN}/p" | sed ${VERSION_NAME_FILTER} > "${mpath}.manifest"
   # Save the options in the .save_opts
   echo ${ORIG_ARGS} > "${mpath}.save_opts"
   arraysSaved=0
@@ -534,7 +534,7 @@ if test "${ARG_ACTION}" == "restore-binary"; then
   arraysSaved=0
   while read x;
   do
-    fname=$(echo "${x}" | cut -d , -f 1 | grep "'${ARG_PATTERN}'" | sed -e "s/'//g")
+    fname=$(echo "${x}" | cut -d , -f 1 | grep "${ARG_PATTERN}" | sed -e "s/'//g")
     name=$(echo "${fname}" | sed s/\@[^\@]*//g)
     if [ -z ${name} ] ;
     then
@@ -579,7 +579,7 @@ checkRestoreOptions
 [ "${NODES}" == "-1" ] && create_dirs ${apath} 1
 # Restore array data.
 while read line; do
-  x=$(echo ${line} | cut -d , -f 1 | grep "'${ARG_PATTERN}'" | sed -e "s/'//g")
+  x=$(echo ${line} | cut -d , -f 1 | grep "${ARG_PATTERN}" | sed -e "s/'//g")
   name=$(echo ${x} | sed s/\@[^\@]*$//)
   if [ -z ${x} ] ;
   then
