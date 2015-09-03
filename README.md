@@ -5,7 +5,7 @@ scripts
 
 Use the man2scidb script  to build a SciDB array that contains the
 SciDB source code Doxygen help for SciDB operators. This script requires
-that you have the SciDB source code, available from http://scidb.org.
+that you have the SciDB source code, available from http://www.paradigm4.com
 
 ### Step 1
 
